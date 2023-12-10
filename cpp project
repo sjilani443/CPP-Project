@@ -1,0 +1,188 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Room
+{
+public:
+    int roomNumber;
+    bool isOccupied;
+    double rate;
+
+    Room(int number, double rate) : roomNumber(number), 
+    isOccupied(false), rate(rate) {}};
+class Reservation
+{
+public:
+    int reservationNumber;
+    int roomNumber;
+    string guestName;
+    int duration;
+
+    Reservation(int resNumber, int roomNumber,const string &name, int duration)
+        : reservationNumber(resNumber), roomNumber(roomNumber),
+         guestName(name), duration(duration) {}};
+class Hotel
+{
+private:
+    vector<Room> rooms;
+    vector<Reservation> reservations;
+    static int lastReservationNumber;
+
+public:
+    Hotel()
+    {
+        for (int i = 1; i <= 10; ++i)
+        {
+            rooms.push_back(Room(i, 100.0 * i));
+        }
+    }
+
+    void displayAvailableRooms()
+    {
+        cout << "\t\tAvailable Rooms:\n";
+        cout << "\t\t-----------------\n";
+        for (const Room &room : rooms)
+        {
+            if (!room.isOccupied)
+            {
+                cout << "\t\tRoom " << room.roomNumber << " ($" << room.rate << " per day)\n";
+            }
+        }
+        cout << "\t\t-----------------\n";
+    }
+
+    void makeReservation()
+    {
+        int roomNumber, duration;
+        string guestName;
+
+        cin.ignore();
+        cout << "\t\tEnter guest name: ";
+        getline(cin, guestName);
+        displayAvailableRooms();
+        cout << "\t\tEnter room number for reservation: ";
+
+        while (!(cin >> roomNumber) || roomNumber < 1 || roomNumber > 10
+         || rooms[roomNumber - 1].isOccupied)
+        {
+            cin.clear();
+            cout << "\t\tInvalid room number or room is already occupied. Please enter a valid room number: ";
+        }
+
+        cout << "\t\tEnter duration of stay (in days): ";
+        while (!(cin >> duration) || duration <= 0)
+        {
+            cin.clear();
+            cout << "\t\tInvalid duration. Please enter a positive integer: ";
+        }
+
+        Room &selectedRoom = rooms[roomNumber - 1];
+        int reservationNumber = ++lastReservationNumber;
+        selectedRoom.isOccupied = true;
+        reservations.push_back(Reservation(reservationNumber, roomNumber, guestName, duration));
+        cout << "\t\tReservation successful! Reservation number: " << reservationNumber << "\n";
+    }
+
+    void displayReservations()
+    {
+        cout << "\t\tReservations:\n";
+        cout << "\t\t-----------------\n";
+        for (const Reservation &reservation : reservations)
+        {
+            cout << "\t\tReservation Number: " << reservation.reservationNumber << "\n";
+            cout << "\t\tGuest Name: " << reservation.guestName << "\n";
+            cout << "\t\tRoom Number: " << reservation.roomNumber << "\n";
+            cout << "\t\tDuration: " << reservation.duration << " days\n";
+            cout << "\t\t-----------------\n";
+        }
+    }
+
+    void vacateroom()
+    {
+        int reservationNumber;
+        cout << "\t\tEnter the reservation number to vacate: ";
+        while (!(cin >> reservationNumber) || reservationNumber <= 0)
+        {
+            cin.clear();
+            cout << "\t\tInvalid reservation number. Please enter a positive integer: ";
+        }
+
+        auto reservationIter = find_if(reservations.begin(), reservations.end(),
+                                       [reservationNumber](const Reservation &r)
+                                       { return r.reservationNumber == reservationNumber; });
+
+        if (reservationIter != reservations.end())
+        {
+            Room &canceledRoom = rooms[reservationIter->roomNumber - 1];
+            canceledRoom.isOccupied = false;
+            reservations.erase(reservationIter);
+            cout << "\t\tThanks for the stay. Have a nice day.\n";
+        }
+        else
+        {
+            cout << "Reservation not found. Please enter a valid reservation number.\n";
+        }
+    }
+};
+
+int Hotel::lastReservationNumber = 0;
+
+int main()
+{
+    system("CLS");
+    Hotel hotel;
+    int choice;
+    do
+    {
+        cout << "\n\n\t\t\tHOTEL ROOM BOOKING SYSTEM\n\n";
+        cout << "\t\t1. Display available rooms\n";
+        cout << "\t\t2. Make a reservation\n";
+        cout << "\t\t3. Display reservations\n";
+        cout << "\t\t4. Vacate the room\n";
+        cout << "\t\t0. Exit\n";
+        cout << "\t\tEnter your choice: ";
+
+        while (!(cin >> choice))
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "\t\tInvalid input. Please enter a number: ";
+        }
+
+        switch (choice)
+        {
+        case 1:
+            hotel.displayAvailableRooms();
+            cout<<"\t"<<system("PAUSE");
+            system("CLS");
+            break;
+
+        case 2:
+            hotel.makeReservation();
+            system("PAUSE");
+            system("CLS");
+            break;
+
+        case 3:
+            hotel.displayReservations();
+            system("PAUSE");
+            break;
+
+        case 4:
+            hotel.vacateroom();
+            system("PAUSE");
+            system("CLS");
+            break;
+
+        case 0:
+            cout << "\t\tThank You. Goodbye!\n";
+            break;
+
+        default:
+            cout << "\t\tInvalid choice. Please try again.\n";
+            break;
+        }
+    } while (choice != 0);
+
+    return 0;
+}
